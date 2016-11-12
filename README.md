@@ -1,3 +1,7 @@
+> This is my fork to allow me to wrap each row in a component I provide.  It is for a very specific use-case and for most people is likely unnecessary.
+
+---
+
 Fixed Data Tables for React
 ====================================
 

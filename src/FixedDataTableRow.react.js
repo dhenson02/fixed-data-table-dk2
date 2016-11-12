@@ -13,6 +13,7 @@
 'use strict';
 
 var React = require('React');
+var shallowCompare = require('react-addons-shallow-compare');
 var FixedDataTableCellGroup = require('FixedDataTableCellGroup.react');
 
 var cx = require('cx');
@@ -85,7 +86,16 @@ var FixedDataTableRowImpl = React.createClass({
      */
     onColumnResize: PropTypes.func,
 
-    getWrapper: PropTypes.func
+    /**
+     * Function to return a wrapping component
+     * @param {Number|String}   rowIndex
+     * @param {React.Component} rowEl
+     */
+    getRowWrapper: PropTypes.func
+  },
+
+  shouldComponentUpdate( nextProps, nextState ) {
+    return shallowCompare(this, nextProps, nextState);
   },
 
   render() /*object*/ {
@@ -115,6 +125,7 @@ var FixedDataTableRowImpl = React.createClass({
         onColumnResize={this.props.onColumnResize}
         rowHeight={this.props.height}
         rowIndex={this.props.index}
+        getRowWrapper={this.props.getRowWrapper}
       />;
     var columnsShadow = this._renderColumnsShadow(fixedColumnsWidth);
     var scrollableColumns =
@@ -130,9 +141,10 @@ var FixedDataTableRowImpl = React.createClass({
         onColumnResize={this.props.onColumnResize}
         rowHeight={this.props.height}
         rowIndex={this.props.index}
+        getRowWrapper={this.props.getRowWrapper}
       />;
 
-    var mainEl = (
+    return (
       <div
         className={joinClasses(className, this.props.className)}
         onClick={this.props.onClick ? this._onClick : null}
@@ -149,11 +161,6 @@ var FixedDataTableRowImpl = React.createClass({
       </div>
     );
 
-    if ( typeof this.props.getWrapper === 'function' ) {
-      return this.props.getWrapper(this.props.index, mainEl);
-    }
-
-    return mainEl;
   },
 
   _getColumnsWidth(/*array*/ columns) /*number*/ {
@@ -227,6 +234,15 @@ var FixedDataTableRow = React.createClass({
      * Width of the row.
      */
     width: PropTypes.number.isRequired,
+
+    /**
+     * Function to return a wrapping component
+     */
+    getRowWrapper: PropTypes.func
+  },
+
+  shouldComponentUpdate( nextProps, nextState ) {
+    return shallowCompare(this, nextProps, nextState);
   },
 
   render() /*object*/ {

@@ -251,6 +251,13 @@ var FixedDataTable = React.createClass({
      * Whether a column is currently being resized.
      */
     isColumnResizing: PropTypes.bool,
+
+    /**
+     * Function to return a wrapping component
+     * @param {Number|String}   rowIndex
+     * @param {React.Component} rowEl
+     */
+    getRowWrapper: PropTypes.func
   },
 
   getDefaultProps() /*object*/ {
@@ -582,6 +589,7 @@ var FixedDataTable = React.createClass({
 
   _renderRows(/*number*/ offsetTop) /*object*/ {
     var state = this.state;
+    var props = this.props;
 
     return (
       <FixedDataTableBufferedRows
@@ -606,6 +614,7 @@ var FixedDataTable = React.createClass({
         showLastRowBorder={true}
         width={state.width}
         rowPositionGetter={this._scrollHelper.getRowPosition}
+        getRowWrapper={props.getRowWrapper}
       />
     );
   },

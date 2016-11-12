@@ -1898,6 +1898,10 @@ rc@~1.1.6:
     minimist "^1.2.0"
     strip-json-comments "~1.0.4"
 
+react-addons-shallow-compare@^15.3.2:
+  version "15.3.2"
+  resolved "https://registry.yarnpkg.com/react-addons-shallow-compare/-/react-addons-shallow-compare-15.3.2.tgz#c9edba49b9eab44d0c59024d289beb1ab97318b5"
+
 react-docgen@^1.2.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/react-docgen/-/react-docgen-1.3.0.tgz#759d197a1b66426ad3291e3393f3c8109cae29c9"

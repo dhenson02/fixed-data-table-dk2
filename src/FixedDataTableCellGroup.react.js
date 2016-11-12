@@ -14,6 +14,7 @@
 
 var FixedDataTableHelper = require('FixedDataTableHelper');
 var React = require('React');
+var shallowCompare = require('react-addons-shallow-compare');
 var FixedDataTableCell = require('FixedDataTableCell.react');
 
 var cx = require('cx');
@@ -50,6 +51,18 @@ var FixedDataTableCellGroupImpl = React.createClass({
     width: PropTypes.number.isRequired,
 
     zIndex: PropTypes.number.isRequired,
+
+
+    /**
+     * Function to return a wrapping component
+     * @param {Number|String}   rowIndex
+     * @param {React.Component} rowEl
+     */
+    getRowWrapper: PropTypes.func
+  },
+
+  shouldComponentUpdate( nextProps, nextState ) {
+    return shallowCompare(this, nextProps, nextState);
   },
 
   render() /*object*/ {
@@ -85,13 +98,18 @@ var FixedDataTableCellGroupImpl = React.createClass({
     };
     translateDOMPositionXY(style, -1 * DIR_SIGN * props.left, 0);
 
-    return (
+    var mainEl = (
       <div
         className={cx('fixedDataTableCellGroupLayout/cellGroup')}
         style={style}>
         {cells}
       </div>
     );
+
+    if ( typeof props.getRowWrapper === 'function' ) {
+      return props.getRowWrapper(props.rowIndex, mainEl);
+    }
+    return mainEl;
   },
 
   _renderCell(
