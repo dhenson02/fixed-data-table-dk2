@@ -84,6 +84,8 @@ var FixedDataTableRowImpl = React.createClass({
      * @param object event
      */
     onColumnResize: PropTypes.func,
+
+    getWrapper: PropTypes.func
   },
 
   render() /*object*/ {
@@ -130,7 +132,7 @@ var FixedDataTableRowImpl = React.createClass({
         rowIndex={this.props.index}
       />;
 
-    return (
+    var mainEl = (
       <div
         className={joinClasses(className, this.props.className)}
         onClick={this.props.onClick ? this._onClick : null}
@@ -146,6 +148,12 @@ var FixedDataTableRowImpl = React.createClass({
         </div>
       </div>
     );
+
+    if ( typeof this.props.getWrapper === 'function' ) {
+      return this.props.getWrapper(this.props.index, mainEl);
+    }
+
+    return mainEl;
   },
 
   _getColumnsWidth(/*array*/ columns) /*number*/ {

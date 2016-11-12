@@ -4530,7 +4530,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param number|string columnKey
 	     * @param object event
 	     */
-	    onColumnResize: PropTypes.func
+	    onColumnResize: PropTypes.func,
+
+	    getWrapper: PropTypes.func
 	  },
 
 	  render: function render() /*object*/{
@@ -4575,7 +4577,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      rowIndex: this.props.index
 	    });
 
-	    return React.createElement(
+	    var mainEl = React.createElement(
 	      'div',
 	      {
 	        className: joinClasses(className, this.props.className),
@@ -4593,6 +4595,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        columnsShadow
 	      )
 	    );
+
+	    if (typeof this.props.getWrapper === 'function') {
+	      return this.props.getWrapper(this.props.index, mainEl);
+	    }
+
+	    return mainEl;
 	  },
 
 	  _getColumnsWidth: function _getColumnsWidth( /*array*/columns) /*number*/{
