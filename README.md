@@ -28,10 +28,10 @@ Things the FixedDataTable **doesn't** do:
 Getting started
 ---------------
 
-Install `fixed-data-table` using npm.
+Install `fixed-data-table-dk` using npm.
 
 ```shell
-npm install fixed-data-table
+npm install fixed-data-table-dk
 ```
 Add the default stylesheet `dist/fixed-data-table.css`, then import it into any module.
 
@@ -40,7 +40,7 @@ Add the default stylesheet `dist/fixed-data-table.css`, then import it into any 
 ```javascript
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Table, Column, Cell} from 'fixed-data-table';
+import {Table, Column, Cell} from 'fixed-data-table-dk';
 
 // Table data as a list of array.
 const rows = [
