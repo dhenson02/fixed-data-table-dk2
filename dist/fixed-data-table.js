@@ -1,5 +1,5 @@
 /**
- * FixedDataTable v0.6.5 
+ * FixedDataTable v0.6.7 
  *
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
@@ -225,11 +225,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// New Table API
 	var Table = __webpack_require__(29);
-	var Column = __webpack_require__(76);
-	var ColumnGroup = __webpack_require__(77);
+	var Column = __webpack_require__(77);
+	var ColumnGroup = __webpack_require__(78);
 
 	// Transition Cell
-	var TransitionCell = __webpack_require__(78);
+	var TransitionCell = __webpack_require__(79);
 
 	var NEXT_VERSION = '0.7.0';
 	var DOCUMENTATION_URL = 'https://fburl.com/FixedDataTable-v0.6';
@@ -777,7 +777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var emptyFunction = __webpack_require__(32);
 	var invariant = __webpack_require__(52);
 	var joinClasses = __webpack_require__(69);
-	var shallowEqual = __webpack_require__(75);
+	var shallowEqual = __webpack_require__(76);
 	var translateDOMPositionXY = __webpack_require__(48);
 
 	var PropTypes = React.PropTypes;
@@ -1028,7 +1028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (props.scrollTop) {
 	      this._scrollHelper.scrollTo(props.scrollTop);
 	    }
-	    this._didScrollStop = debounceCore(this._didScrollStop, 200, this);
+	    this._didScrollStop = debounceCore(this._didScrollStop, this);
 
 	    return this._calculateState(this.props);
 	  },
@@ -1866,7 +1866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(ReactWheelHandler, [{
 	    key: 'onWheel',
-	    value: function onWheel( /*object*/event) {
+	    value: function onWheel( /*Object*/event) {
 	      var normalizedEvent = normalizeWheel(event);
 	      var deltaX = this._deltaX + normalizedEvent.pixelX;
 	      var deltaY = this._deltaY + normalizedEvent.pixelY;
@@ -3941,8 +3941,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var clamp = __webpack_require__(57);
 	var invariant = __webpack_require__(52);
-	var MIN_BUFFER_ROWS = 3;
-	var MAX_BUFFER_ROWS = 6;
+	var MIN_BUFFER_ROWS = 12;
+	var MAX_BUFFER_ROWS = 18;
 
 	// FixedDataTableRowBuffer is a helper class that executes row buffering
 	// logic for FixedDataTable. It figures out which rows should be rendered
@@ -4744,8 +4744,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * LICENSE file in the root directory of this source tree. An additional grant
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 *
-	* @providesModule shallowCompare
-	*/
+	 */
 
 	'use strict';
 
@@ -5817,7 +5816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PrefixIntervalTree = __webpack_require__(72);
 	var clamp = __webpack_require__(57);
 
-	var BUFFER_ROWS = 5;
+	var BUFFER_ROWS = 16;
 	var NO_ROWS_SCROLL_RESULT = {
 	  index: 0,
 	  offset: 0,
@@ -6381,26 +6380,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var React = __webpack_require__(27);
 
-	function getTotalWidth( /*array*/columns) /*number*/{
+	function getTotalWidth( /*Array*/columns) /*number*/{
 	  var totalWidth = 0;
-	  for (var i = 0; i < columns.length; ++i) {
+	  var columnCount = columns.length;
+	  var i = 0;
+	  for (; i < columnCount; ++i) {
 	    totalWidth += columns[i].props.width;
 	  }
 	  return totalWidth;
 	}
 
-	function getTotalFlexGrow( /*array*/columns) /*number*/{
+	function getTotalFlexGrow( /*Array*/columns) /*number*/{
 	  var totalFlexGrow = 0;
-	  for (var i = 0; i < columns.length; ++i) {
+	  var columnCount = columns.length;
+	  var i = 0;
+	  for (; i < columnCount; ++i) {
 	    totalFlexGrow += columns[i].props.flexGrow || 0;
 	  }
 	  return totalFlexGrow;
 	}
 
 	function distributeFlexWidth(
-	/*array*/columns,
-	/*number*/flexWidth) /*object*/{
-	  if (flexWidth <= 0) {
+	/*Array*/columns,
+	/*number*/flexWidth) /*Object*/{
+	  if (flexWidth < 1) {
 	    return {
 	      columns: columns,
 	      width: getTotalWidth(columns)
@@ -6410,7 +6413,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var remainingFlexWidth = flexWidth;
 	  var newColumns = [];
 	  var totalWidth = 0;
-	  for (var i = 0; i < columns.length; ++i) {
+	  var columnCount = columns.length;
+	  var i = 0;
+	  for (; i < columnCount; ++i) {
 	    var column = columns[i];
 	    if (!column.props.flexGrow) {
 	      totalWidth += column.props.width;
@@ -6434,29 +6439,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function adjustColumnGroupWidths(
-	/*array*/columnGroups,
-	/*number*/expectedWidth) /*object*/{
+	/*Array*/columnGroups,
+	/*number*/expectedWidth) /*Object*/{
 	  var allColumns = [];
-	  var i;
-	  for (i = 0; i < columnGroups.length; ++i) {
-	    React.Children.forEach(columnGroups[i].props.children, function (column) {
-	      allColumns.push(column);
-	    });
+	  var addColumn = function addColumn(column) {
+	    allColumns[allColumns.length] = column;
+	  };
+	  var columnGroupCount = columnGroups.length;
+	  var i = 0;
+	  var j = 0;
+
+	  for (; i < columnGroupCount; ++i) {
+	    React.Children.forEach(columnGroups[i].props.children, addColumn);
 	  }
 	  var columnsWidth = getTotalWidth(allColumns);
 	  var remainingFlexGrow = getTotalFlexGrow(allColumns);
-	  var remainingFlexWidth = Math.max(expectedWidth - columnsWidth, 0);
+	  var potentialFlexWidth = expectedWidth - columnsWidth;
+	  var remainingFlexWidth = potentialFlexWidth > 0 ? potentialFlexWidth : 0;
 
 	  var newAllColumns = [];
 	  var newColumnGroups = [];
+	  var columnGroup;
+	  var currentColumns;
+	  var newColumnCount = 0;
+	  var addCurrentColumn = function addCurrentColumn(column) {
+	    currentColumns[currentColumns.length] = column;
+	  };
 
-	  for (i = 0; i < columnGroups.length; ++i) {
-	    var columnGroup = columnGroups[i];
-	    var currentColumns = [];
+	  for (i = 0; i < columnGroupCount; ++i) {
+	    columnGroup = columnGroups[i];
+	    currentColumns = [];
 
-	    React.Children.forEach(columnGroup.props.children, function (column) {
-	      currentColumns.push(column);
-	    });
+	    React.Children.forEach(columnGroup.props.children, addCurrentColumn);
 
 	    var columnGroupFlexGrow = getTotalFlexGrow(currentColumns);
 	    var columnGroupFlexWidth = Math.floor(columnGroupFlexGrow / remainingFlexGrow * remainingFlexWidth);
@@ -6465,8 +6479,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    remainingFlexGrow -= columnGroupFlexGrow;
 	    remainingFlexWidth -= columnGroupFlexWidth;
+	    newColumnCount = newColumnSettings.columns.length;
 
-	    for (var j = 0; j < newColumnSettings.columns.length; ++j) {
+	    for (j = 0; j < newColumnCount; ++j) {
 	      newAllColumns.push(newColumnSettings.columns[j]);
 	    }
 
@@ -6480,8 +6495,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function adjustColumnWidths(
-	/*array*/columns,
-	/*number*/expectedWidth) /*array*/{
+	/*Array*/columns,
+	/*number*/expectedWidth) /*Array*/{
 	  var columnsWidth = getTotalWidth(columns);
 	  if (columnsWidth < expectedWidth) {
 	    return distributeFlexWidth(columns, expectedWidth - columnsWidth).columns;
@@ -6501,7 +6516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 74 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Copyright (c) 2015, Facebook, Inc.
@@ -6514,6 +6529,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @providesModule debounceCore
 	 * @typechecks
 	 */
+
+	'use strict';
+
+	var idleCallback = __webpack_require__(75);
 
 	/**
 	 * Invokes the given callback after a specified number of milliseconds have
@@ -6541,12 +6560,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @param {?function} clearTimeoutFunc - an implementation of clearTimeout
 	 *  if nothing is passed in the default clearTimeout function is used
 	 */
-	"use strict";
-
-	function debounce(func, wait, context, setTimeoutFunc, clearTimeoutFunc) {
-	  setTimeoutFunc = setTimeoutFunc || setTimeout;
-	  clearTimeoutFunc = clearTimeoutFunc || clearTimeout;
-	  var timeout;
+	function debounce(func, context) {
+	  var requestIdleCallback = idleCallback.request;
+	  var cancelIdleCallback = idleCallback.cancel;
+	  var pendingCallback;
 
 	  function debouncer() {
 	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -6559,11 +6576,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      func.apply(context, args);
 	    };
 	    callback.__SMmeta = func.__SMmeta;
-	    timeout = setTimeoutFunc(callback, wait);
+	    pendingCallback = requestIdleCallback(callback);
 	  }
 
 	  debouncer.reset = function () {
-	    clearTimeoutFunc(timeout);
+	    cancelIdleCallback(pendingCallback);
 	  };
 
 	  return debouncer;
@@ -6573,6 +6590,44 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 75 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by Deryck on 12/31/16.
+	 */
+
+	'use strict';
+
+	/**
+	 * Courtesy of Mr. Paul Lewis.
+	 * https://developers.google.com/web/updates/2015/08/using-requestidlecallback
+	 * @type {Function}
+	 */
+
+	var requestIdleShimBack = function requestIdleShimBack(cb) {
+	    var start = Date.now();
+	    return setTimeout(function () {
+	        cb({
+	            didTimeout: false,
+	            timeRemaining: function timeRemaining() {
+	                var time = 50 - (Date.now() - start);
+	                return time > 0 ? time : 0;
+	            }
+	        });
+	    }, 1);
+	};
+
+	var requestIdleCallback = window.requestIdleCallback || requestIdleShimBack;
+
+	var cancelIdleCallback = window.cancelIdleCallback || clearTimeout;
+
+	module.exports = {
+	    'request': requestIdleCallback,
+	    'cancel': cancelIdleCallback
+	};
+
+/***/ },
+/* 76 */
 /***/ function(module, exports) {
 
 	/**
@@ -6627,7 +6682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = shallowEqual;
 
 /***/ },
-/* 76 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6811,7 +6866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FixedDataTableColumn;
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6893,7 +6948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FixedDataTableColumnGroup;
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -6924,7 +6979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cx = __webpack_require__(47);
 	var joinClasses = __webpack_require__(69);
-	var shallowEqual = __webpack_require__(75);
+	var shallowEqual = __webpack_require__(76);
 
 	var CellDefault = __webpack_require__(68);
 

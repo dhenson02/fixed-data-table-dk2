@@ -10,6 +10,8 @@
  * @typechecks
  */
 
+var idleCallback = require('./requestIdleCallback');
+
 /**
  * Invokes the given callback after a specified number of milliseconds have
  * elapsed, ignoring subsequent calls.
@@ -36,10 +38,10 @@
   * @param {?function} clearTimeoutFunc - an implementation of clearTimeout
  *  if nothing is passed in the default clearTimeout function is used
  */
-function debounce(func, wait, context, setTimeoutFunc, clearTimeoutFunc) {
-  setTimeoutFunc = setTimeoutFunc || setTimeout;
-  clearTimeoutFunc = clearTimeoutFunc || clearTimeout;
-  var timeout;
+function debounce(func, context) {
+  var requestIdleCallback = idleCallback.request;
+  var cancelIdleCallback = idleCallback.cancel;
+  var pendingCallback;
 
   function debouncer(...args) {
     debouncer.reset();
@@ -48,11 +50,11 @@ function debounce(func, wait, context, setTimeoutFunc, clearTimeoutFunc) {
       func.apply(context, args);
     };
     callback.__SMmeta = func.__SMmeta;
-    timeout = setTimeoutFunc(callback, wait);
+    pendingCallback = requestIdleCallback(callback);
   }
 
   debouncer.reset = function() {
-    clearTimeoutFunc(timeout);
+    cancelIdleCallback(pendingCallback);
   };
 
   return debouncer;

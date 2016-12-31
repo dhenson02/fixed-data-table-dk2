@@ -15,7 +15,7 @@
 var PrefixIntervalTree = require('PrefixIntervalTree');
 var clamp = require('clamp');
 
-var BUFFER_ROWS = 5;
+var BUFFER_ROWS = 16;
 var NO_ROWS_SCROLL_RESULT = {
   index: 0,
   offset: 0,
