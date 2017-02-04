@@ -10,7 +10,36 @@
  * @typechecks
  */
 
-var idleCallback = require('./requestIdleCallback');
+/**
+ * Courtesy of Mr. Paul Lewis.
+ * https://developers.google.com/web/updates/2015/08/using-requestidlecallback
+ * @type {Function}
+ */
+
+function requestIdleShimBack ( cb ) {
+  return function () {
+    var start = Date.now();
+    return setTimeout(function () {
+      cb({
+        'didTimeout': false,
+        'timeRemaining': function () {
+          var timeDiff = 50 - (Date.now() - start);
+          return timeDiff > 0 ?
+                 timeDiff :
+                 0;
+        }
+      });
+    }, 1);
+  };
+};
+
+var requestIdleCallback =
+  window.requestIdleCallback ||
+  requestIdleShimBack;
+
+var cancelIdleCallback =
+  window.cancelIdleCallback ||
+  clearTimeout;
 
 /**
  * Invokes the given callback after a specified number of milliseconds have
@@ -39,8 +68,6 @@ var idleCallback = require('./requestIdleCallback');
  *  if nothing is passed in the default clearTimeout function is used
  */
 function debounce(func, context) {
-  var requestIdleCallback = idleCallback.request;
-  var cancelIdleCallback = idleCallback.cancel;
   var pendingCallback;
 
   function debouncer(...args) {

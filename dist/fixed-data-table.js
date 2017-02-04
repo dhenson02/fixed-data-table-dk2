@@ -1,5 +1,5 @@
 /**
- * FixedDataTable v0.6.9 
+ * FixedDataTable v0.6.10 
  *
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
@@ -187,7 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Table: FixedDataTable
 	};
 
-	FixedDataTableRoot.version = '0.6.9';
+	FixedDataTableRoot.version = '0.6.10';
 	module.exports = FixedDataTableRoot;
 
 /***/ },
@@ -225,11 +225,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// New Table API
 	var Table = __webpack_require__(29);
-	var Column = __webpack_require__(75);
-	var ColumnGroup = __webpack_require__(76);
+	var Column = __webpack_require__(74);
+	var ColumnGroup = __webpack_require__(75);
 
 	// Transition Cell
-	var TransitionCell = __webpack_require__(77);
+	var TransitionCell = __webpack_require__(76);
 
 	var NEXT_VERSION = '0.7.0';
 	var DOCUMENTATION_URL = 'https://fburl.com/FixedDataTable-v0.6';
@@ -6780,7 +6780,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 73 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/**
 	 * Copyright (c) 2015, Facebook, Inc.
@@ -6794,9 +6794,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typechecks
 	 */
 
+	/**
+	 * Courtesy of Mr. Paul Lewis.
+	 * https://developers.google.com/web/updates/2015/08/using-requestidlecallback
+	 * @type {Function}
+	 */
+
 	'use strict';
 
-	var idleCallback = __webpack_require__(74);
+	function requestIdleShimBack(cb) {
+	  return function () {
+	    var start = Date.now();
+	    return setTimeout(function () {
+	      cb({
+	        'didTimeout': false,
+	        'timeRemaining': function timeRemaining() {
+	          var timeDiff = 50 - (Date.now() - start);
+	          return timeDiff > 0 ? timeDiff : 0;
+	        }
+	      });
+	    }, 1);
+	  };
+	};
+
+	var requestIdleCallback = window.requestIdleCallback || requestIdleShimBack;
+
+	var cancelIdleCallback = window.cancelIdleCallback || clearTimeout;
 
 	/**
 	 * Invokes the given callback after a specified number of milliseconds have
@@ -6825,8 +6848,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *  if nothing is passed in the default clearTimeout function is used
 	 */
 	function debounce(func, context) {
-	  var requestIdleCallback = idleCallback.request;
-	  var cancelIdleCallback = idleCallback.cancel;
 	  var pendingCallback;
 
 	  function debouncer() {
@@ -6854,44 +6875,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 74 */
-/***/ function(module, exports) {
-
-	/**
-	 * Created by Deryck on 12/31/16.
-	 */
-
-	'use strict';
-
-	/**
-	 * Courtesy of Mr. Paul Lewis.
-	 * https://developers.google.com/web/updates/2015/08/using-requestidlecallback
-	 * @type {Function}
-	 */
-
-	var requestIdleShimBack = function requestIdleShimBack(cb) {
-	    var start = Date.now();
-	    return setTimeout(function () {
-	        cb({
-	            didTimeout: false,
-	            timeRemaining: function timeRemaining() {
-	                var time = 50 - (Date.now() - start);
-	                return time > 0 ? time : 0;
-	            }
-	        });
-	    }, 1);
-	};
-
-	var requestIdleCallback = window.requestIdleCallback || requestIdleShimBack;
-
-	var cancelIdleCallback = window.cancelIdleCallback || clearTimeout;
-
-	module.exports = {
-	    'request': requestIdleCallback,
-	    'cancel': cancelIdleCallback
-	};
-
-/***/ },
-/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7077,7 +7060,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FixedDataTableColumn;
 
 /***/ },
-/* 76 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7159,7 +7142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FixedDataTableColumnGroup;
 
 /***/ },
-/* 77 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
