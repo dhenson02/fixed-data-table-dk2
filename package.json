@@ -1,6 +1,6 @@
 {
   "name": "fixed-data-table-dk",
-  "version": "0.6.7",
+  "version": "0.6.9",
   "description": "A React table component designed to allow presenting thousands of rows of data.  With one or two changes.",
   "main": "main.js",
   "peerDependencies": {
@@ -15,6 +15,7 @@
     "css-loader": "^0.9.1",
     "extract-text-webpack-plugin": "^0.3.8",
     "faker": "^2.1.2",
+    "fastdom": "^1.0.5",
     "file-loader": "^0.8.1",
     "glob": "^4.3.5",
     "html-loader": "^0.2.3",
@@ -26,8 +27,8 @@
     "postcss-custom-properties": "3.0.1",
     "react": "^15.4.0",
     "react-addons-shallow-compare": "^15.4.0",
-    "react-dom": "^15.4.0",
     "react-docgen": "^1.2.0",
+    "react-dom": "^15.4.0",
     "react-tools": "^0.12.2",
     "style-loader": "^0.8.3",
     "url-loader": "^0.5.5",

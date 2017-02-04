@@ -13,7 +13,7 @@
 'use strict';
 
 var React = require('React');
-var shallowCompare = require('react-addons-shallow-compare');
+var shallowEqual = require('shallowEqual');
 var FixedDataTableCellGroup = require('FixedDataTableCellGroup.react');
 
 var cx = require('cx');
@@ -94,8 +94,47 @@ var FixedDataTableRowImpl = React.createClass({
     getRowWrapper: PropTypes.func
   },
 
+  cellPositionTesters: [],
+
+  setCellGroupRef( checkCellPosition ) {
+    return el => {
+      this.cellPositionTesters.push(checkCellPosition.bind(el));
+    }
+  },
+
+  testPositions( left, width ) {
+    var nextProps = {
+      left,
+      width
+    };
+    var i = 0;
+    var cellPositionTesters = this.cellPositionTesters;
+    var total = cellPositionTesters.length;
+    var check;
+    for ( ; i < total; ++i ) {
+      check = cellPositionTesters[ i ];
+      if ( check(nextProps) ) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+  componentWillReceiveProps( nextProps ) {
+    var scrollLeft = nextProps.scrollLeft;
+    if ( scrollLeft !== this.props.scrollLeft && this.testPositions(scrollLeft, nextProps.width) ) {
+      this.forceUpdate();
+    }
+  },
+
   shouldComponentUpdate( nextProps, nextState ) {
-    return shallowCompare(this, nextProps, nextState);
+    return nextProps.isScrolling !== this.props.isScrolling ||
+           nextProps.height !== this.props.height ||
+           nextProps.index !== this.props.index ||
+           // nextProps.scrollLeft !== this.props.scrollLeft ||
+           nextProps.width !== this.props.width ||
+           !shallowEqual(nextProps.fixedColumns, this.props.fixedColumns) ||
+           !shallowEqual(nextProps.scrollableColumns, this.props.scrollableColumns);
   },
 
   render() /*object*/ {
@@ -134,6 +173,7 @@ var FixedDataTableRowImpl = React.createClass({
         isScrolling={this.props.isScrolling}
         height={this.props.height}
         left={this.props.scrollLeft}
+        setRef={this.setCellGroupRef}
         offsetLeft={fixedColumnsWidth}
         width={this.props.width - fixedColumnsWidth}
         zIndex={0}
@@ -241,8 +281,12 @@ var FixedDataTableRow = React.createClass({
     getRowWrapper: PropTypes.func
   },
 
-  shouldComponentUpdate( nextProps, nextState ) {
-    return shallowCompare(this, nextProps, nextState);
+  shouldComponentUpdate( nextProps ) {
+    return nextProps.isScrolling !== this.props.isScrolling ||
+           nextProps.height !== this.props.height ||
+           nextProps.zIndex !== this.props.zIndex ||
+           nextProps.offsetTop !== this.props.offsetTop ||
+           nextProps.width !== this.props.width;
   },
 
   render() /*object*/ {

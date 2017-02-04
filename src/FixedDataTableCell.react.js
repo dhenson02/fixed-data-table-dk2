@@ -76,13 +76,20 @@ var FixedDataTableCell = React.createClass({
      * The left offset in pixels of the cell.
      */
     left: PropTypes.number,
+
+    setRef: PropTypes.func
   },
 
   shouldComponentUpdate(nextProps) {
-    return (
-      !nextProps.isScrolling ||
-      this.props.rowIndex !== nextProps.rowIndex
-    );
+    return !nextProps.isScrolling ||
+           nextProps.rowIndex !== this.props.rowIndex ||
+           nextProps.columnKey !== this.props.columnKey ||
+           nextProps.className !== this.props.className ||
+           nextProps.highlighted !== this.props.highlighted ||
+           nextProps.width !== this.props.width ||
+           nextProps.minWidth !== this.props.minWidth ||
+           nextProps.maxWidth !== this.props.maxWidth ||
+           nextProps.height !== this.props.height;
   },
 
   getDefaultProps() /*object*/ {
@@ -163,7 +170,7 @@ var FixedDataTableCell = React.createClass({
     }
 
     return (
-      <div className={className} style={style}>
+      <div className={className} style={style} ref={props.setRef}>
         {columnResizerComponent}
         {content}
       </div>

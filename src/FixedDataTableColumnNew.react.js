@@ -167,6 +167,8 @@ var FixedDataTableColumn = React.createClass({
      * cell rendered if the row it belongs to is visible.
      */
     allowCellsRecycling: PropTypes.bool,
+
+    setRef: PropTypes.func
   },
 
   getDefaultProps() /*object*/ {

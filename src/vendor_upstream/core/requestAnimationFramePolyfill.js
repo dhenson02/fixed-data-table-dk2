@@ -22,7 +22,10 @@ var requestAnimationFrame =
   nativeRequestAnimationFrame ||
   function(callback) {
     var currTime = Date.now();
-    var timeDelay = Math.max(0, 16 - (currTime - lastTime));
+    var timeDiff = 16 - (currTime - lastTime);
+    var timeDelay = timeDiff > 0
+        ? timeDiff
+        : 0;
     lastTime = currTime + timeDelay;
     return global.setTimeout(function() {
       callback(Date.now());
