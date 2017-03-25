@@ -257,7 +257,13 @@ var FixedDataTable = React.createClass({
      * @param {Number|String}   rowIndex
      * @param {React.Component} rowEl
      */
-    getRowWrapper: PropTypes.func
+    getRowWrapper: PropTypes.func,
+
+    /**
+     * Determines whether onScrollEnd is delayed to try helping perf.
+     * Set false to do manual debounce inside of onScrollEnd handler
+     */
+    debounceScroll: PropTypes.bool
   },
 
   getDefaultProps() /*object*/ {
@@ -286,9 +292,9 @@ var FixedDataTable = React.createClass({
     if (props.scrollTop) {
       this._scrollHelper.scrollTo(props.scrollTop);
     }
-    this._didScrollStop = debounceCore(this._didScrollStop, this);
+    this._didScrollStop = debounceCore(this._didScrollStop, this, props.debounceScroll);
 
-    return this._calculateState(this.props);
+    return this._calculateState(props);
   },
 
   componentWillMount() {
@@ -308,6 +314,7 @@ var FixedDataTable = React.createClass({
   },
 
   _shouldHandleWheelX(/*number*/ delta) /*boolean*/ {
+    var state, scrollX, maxScrollX;
     if (this.props.overflowX === 'hidden') {
       return false;
     }
@@ -317,13 +324,18 @@ var FixedDataTable = React.createClass({
       return false;
     }
 
+    state = this.state;
+    scrollX = state.scrollX;
+    maxScrollX = state.maxScrollX;
+
     return (
-      (delta < 0 && this.state.scrollX > 0) ||
-      (delta >= 0 && this.state.scrollX < this.state.maxScrollX)
+      (delta < 0 && scrollX > 0) ||
+      (delta >= 0 && scrollX < maxScrollX)
     );
   },
 
   _shouldHandleWheelY(/*number*/ delta) /*boolean*/ {
+    var state, scrollY, maxScrollY;
     if (this.props.overflowY === 'hidden'|| delta === 0) {
       return false;
     }
@@ -333,28 +345,35 @@ var FixedDataTable = React.createClass({
       return false;
     }
 
+    state = this.state;
+    scrollY = state.scrollY;
+    maxScrollY = state.maxScrollY;
+
     return (
-      (delta < 0 && this.state.scrollY > 0) ||
-      (delta >= 0 && this.state.scrollY < this.state.maxScrollY)
+      (delta < 0 && scrollY > 0) ||
+      (delta >= 0 && scrollY < maxScrollY)
     );
   },
 
   _reportContentHeight() {
-    var scrollContentHeight = this.state.scrollContentHeight;
-    var reservedHeight = this.state.reservedHeight;
+    var state = this.state;
+    var props = this.props;
+    var scrollContentHeight = state.scrollContentHeight;
+    var reservedHeight = state.reservedHeight;
     var requiredHeight = scrollContentHeight + reservedHeight;
     var contentHeight;
-    var useMaxHeight = this.props.height === undefined;
-    if (useMaxHeight && this.props.maxHeight > requiredHeight) {
+    var useMaxHeight = props.height === undefined;
+    var ownerHeight = props.ownerHeight;
+    if (useMaxHeight && props.maxHeight > requiredHeight) {
       contentHeight = requiredHeight;
-    } else if (this.state.height > requiredHeight && this.props.ownerHeight) {
-      contentHeight = Math.max(requiredHeight, this.props.ownerHeight);
+    } else if (state.height > requiredHeight && ownerHeight) {
+      contentHeight = requiredHeight > ownerHeight ? requiredHeight : ownerHeight;
     } else {
-      contentHeight = this.state.height + this.state.maxScrollY;
+      contentHeight = state.height + state.maxScrollY;
     }
     if (contentHeight !== this._contentHeight &&
-        this.props.onContentHeightChange) {
-      this.props.onContentHeightChange(contentHeight);
+        props.onContentHeightChange) {
+      props.onContentHeightChange(contentHeight);
     }
     this._contentHeight = contentHeight;
   },
@@ -449,7 +468,8 @@ var FixedDataTable = React.createClass({
         props.ownerHeight - state.footerHeight - scrollbarXHeight
       );
 
-      scrollbarYHeight = Math.max(0, footOffsetTop - bodyOffsetTop);
+      var footBodyDiff = footOffsetTop - bodyOffsetTop;
+      scrollbarYHeight = footBodyDiff > 0 ? footBodyDiff : 0;
     }
 
     var verticalScrollbar;

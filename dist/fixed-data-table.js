@@ -1,5 +1,5 @@
 /**
- * FixedDataTable v0.6.10 
+ * FixedDataTable v0.6.11 
  *
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
@@ -187,7 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Table: FixedDataTable
 	};
 
-	FixedDataTableRoot.version = '0.6.10';
+	FixedDataTableRoot.version = '0.6.11';
 	module.exports = FixedDataTableRoot;
 
 /***/ },
@@ -1008,7 +1008,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param {Number|String}   rowIndex
 	     * @param {React.Component} rowEl
 	     */
-	    getRowWrapper: PropTypes.func
+	    getRowWrapper: PropTypes.func,
+
+	    /**
+	     * Determines whether onScrollEnd is delayed to try helping perf.
+	     * Set false to do manual debounce inside of onScrollEnd handler
+	     */
+	    debounceScroll: PropTypes.bool
 	  },
 
 	  getDefaultProps: function getDefaultProps() /*object*/{
@@ -1028,9 +1034,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (props.scrollTop) {
 	      this._scrollHelper.scrollTo(props.scrollTop);
 	    }
-	    this._didScrollStop = debounceCore(this._didScrollStop, this);
+	    this._didScrollStop = debounceCore(this._didScrollStop, this, props.debounceScroll);
 
-	    return this._calculateState(this.props);
+	    return this._calculateState(props);
 	  },
 
 	  componentWillMount: function componentWillMount() {
@@ -1046,6 +1052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  _shouldHandleWheelX: function _shouldHandleWheelX( /*number*/delta) /*boolean*/{
+	    var state, scrollX, maxScrollX;
 	    if (this.props.overflowX === 'hidden') {
 	      return false;
 	    }
@@ -1055,10 +1062,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 	    }
 
-	    return delta < 0 && this.state.scrollX > 0 || delta >= 0 && this.state.scrollX < this.state.maxScrollX;
+	    state = this.state;
+	    scrollX = state.scrollX;
+	    maxScrollX = state.maxScrollX;
+
+	    return delta < 0 && scrollX > 0 || delta >= 0 && scrollX < maxScrollX;
 	  },
 
 	  _shouldHandleWheelY: function _shouldHandleWheelY( /*number*/delta) /*boolean*/{
+	    var state, scrollY, maxScrollY;
 	    if (this.props.overflowY === 'hidden' || delta === 0) {
 	      return false;
 	    }
@@ -1068,24 +1080,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return false;
 	    }
 
-	    return delta < 0 && this.state.scrollY > 0 || delta >= 0 && this.state.scrollY < this.state.maxScrollY;
+	    state = this.state;
+	    scrollY = state.scrollY;
+	    maxScrollY = state.maxScrollY;
+
+	    return delta < 0 && scrollY > 0 || delta >= 0 && scrollY < maxScrollY;
 	  },
 
 	  _reportContentHeight: function _reportContentHeight() {
-	    var scrollContentHeight = this.state.scrollContentHeight;
-	    var reservedHeight = this.state.reservedHeight;
+	    var state = this.state;
+	    var props = this.props;
+	    var scrollContentHeight = state.scrollContentHeight;
+	    var reservedHeight = state.reservedHeight;
 	    var requiredHeight = scrollContentHeight + reservedHeight;
 	    var contentHeight;
-	    var useMaxHeight = this.props.height === undefined;
-	    if (useMaxHeight && this.props.maxHeight > requiredHeight) {
+	    var useMaxHeight = props.height === undefined;
+	    var ownerHeight = props.ownerHeight;
+	    if (useMaxHeight && props.maxHeight > requiredHeight) {
 	      contentHeight = requiredHeight;
-	    } else if (this.state.height > requiredHeight && this.props.ownerHeight) {
-	      contentHeight = Math.max(requiredHeight, this.props.ownerHeight);
+	    } else if (state.height > requiredHeight && ownerHeight) {
+	      contentHeight = requiredHeight > ownerHeight ? requiredHeight : ownerHeight;
 	    } else {
-	      contentHeight = this.state.height + this.state.maxScrollY;
+	      contentHeight = state.height + state.maxScrollY;
 	    }
-	    if (contentHeight !== this._contentHeight && this.props.onContentHeightChange) {
-	      this.props.onContentHeightChange(contentHeight);
+	    if (contentHeight !== this._contentHeight && props.onContentHeightChange) {
+	      props.onContentHeightChange(contentHeight);
 	    }
 	    this._contentHeight = contentHeight;
 	  },
@@ -1165,7 +1184,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      footOffsetTop = Math.min(footOffsetTop, props.ownerHeight - state.footerHeight - scrollbarXHeight);
 
-	      scrollbarYHeight = Math.max(0, footOffsetTop - bodyOffsetTop);
+	      var footBodyDiff = footOffsetTop - bodyOffsetTop;
+	      scrollbarYHeight = footBodyDiff > 0 ? footBodyDiff : 0;
 	    }
 
 	    var verticalScrollbar;
@@ -4187,8 +4207,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var clamp = __webpack_require__(58);
 	var invariant = __webpack_require__(53);
-	var MIN_BUFFER_ROWS = 12;
-	var MAX_BUFFER_ROWS = 18;
+	var MIN_BUFFER_ROWS = 8;
+	var MAX_BUFFER_ROWS = 12;
 
 	// FixedDataTableRowBuffer is a helper class that executes row buffering
 	// logic for FixedDataTable. It figures out which rows should be rendered
@@ -6080,7 +6100,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PrefixIntervalTree = __webpack_require__(71);
 	var clamp = __webpack_require__(58);
 
-	var BUFFER_ROWS = 16;
+	var BUFFER_ROWS = 10;
 	var NO_ROWS_SCROLL_RESULT = {
 	  index: 0,
 	  offset: 0,
@@ -6188,7 +6208,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return NO_ROWS_SCROLL_RESULT;
 	      }
 	      var firstRow = this._rowOffsets.greatestLowerBound(this._position);
-	      firstRow = clamp(firstRow, 0, Math.max(this._rowCount - 1, 0));
+	      var _count = this._rowCount - 1;
+	      var count = _count > 0 ? _count : 0;
+	      firstRow = clamp(firstRow, 0, count);
 	      var firstRowPosition = this._rowOffsets.sumUntil(firstRow);
 	      var rowIndex = firstRow;
 	      var position = this._position;
@@ -6240,7 +6262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      position = clamp(position, 0, maxPosition);
 	      this._position = position;
 	      var firstRowIndex = this._rowOffsets.greatestLowerBound(position);
-	      firstRowIndex = clamp(firstRowIndex, 0, Math.max(this._rowCount - 1, 0));
+	      firstRowIndex = clamp(firstRowIndex, 0, count);
 	      firstRowPosition = this._rowOffsets.sumUntil(firstRowIndex);
 	      var firstRowOffset = firstRowPosition - position;
 
@@ -6271,10 +6293,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	      var position = this._rowOffsets.sumTo(rowIndex) - this._viewportHeight;
-	      if (position < 0) {
-	        position = 0;
-	      }
-	      return position;
+	      return position < 0 ? 0 : position;
 	    }
 	  }, {
 	    key: 'scrollTo',
@@ -6282,6 +6301,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this._rowCount === 0) {
 	        return NO_ROWS_SCROLL_RESULT;
 	      }
+	      var rowIndex = this._rowCount - 1;
 	      if (position <= 0) {
 	        // If position less than or equal to 0 first row should be fully visible
 	        // on top
@@ -6297,13 +6317,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else if (position >= this._contentHeight - this._viewportHeight) {
 	        // If position is equal to or greater than max scroll value, we need
 	        // to make sure to have bottom border of last row visible.
-	        var rowIndex = this._rowCount - 1;
 	        position = this._getRowAtEndPosition(rowIndex);
 	      }
 	      this._position = position;
 
 	      var firstRowIndex = this._rowOffsets.greatestLowerBound(position);
-	      firstRowIndex = clamp(firstRowIndex, 0, Math.max(this._rowCount - 1, 0));
+	      firstRowIndex = clamp(firstRowIndex, 0, rowIndex > 0 ? rowIndex : 0);
 	      var firstRowPosition = this._rowOffsets.sumUntil(firstRowIndex);
 	      var firstRowOffset = firstRowPosition - position;
 
@@ -6325,10 +6344,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'scrollToRow',
 	    value: function scrollToRow( /*number*/rowIndex, /*number*/offset) /*object*/{
-	      rowIndex = clamp(rowIndex, 0, Math.max(this._rowCount - 1, 0));
-	      offset = clamp(offset, -this._storedHeights[rowIndex], 0);
-	      var firstRow = this._rowOffsets.sumUntil(rowIndex);
-	      return this.scrollTo(firstRow - offset);
+	      var count = this._rowCount - 1;
+	      var newIndex = clamp(rowIndex, 0, count > 0 ? count : 0);
+	      var newOffset = clamp(offset, -this._storedHeights[newIndex], 0);
+	      var firstRow = this._rowOffsets.sumUntil(newIndex);
+	      return this.scrollTo(firstRow - newOffset);
 	    }
 
 	    /**
@@ -6342,13 +6362,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'scrollRowIntoView',
 	    value: function scrollRowIntoView( /*number*/rowIndex) /*object*/{
-	      rowIndex = clamp(rowIndex, 0, Math.max(this._rowCount - 1, 0));
-	      var rowBegin = this._rowOffsets.sumUntil(rowIndex);
-	      var rowEnd = rowBegin + this._storedHeights[rowIndex];
+	      var count = this._rowCount - 1;
+	      var newIndex = clamp(rowIndex, 0, count > 0 ? count : 0);
+	      var rowBegin = this._rowOffsets.sumUntil(newIndex);
+	      var rowEnd = rowBegin + this._storedHeights[newIndex];
 	      if (rowBegin < this._position) {
 	        return this.scrollTo(rowBegin);
 	      } else if (this._position + this._viewportHeight < rowEnd) {
-	        var position = this._getRowAtEndPosition(rowIndex);
+	        var position = this._getRowAtEndPosition(newIndex);
 	        return this.scrollTo(position);
 	      }
 	      return this.scrollTo(this._position);
@@ -6840,14 +6861,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   debouncedUpdatePreview.reset();
 	 *
 	 * @param {function} func - the function to debounce
-	 * @param {number} wait - how long to wait in milliseconds
 	 * @param {*} context - optional context to invoke the function in
-	 * @param {?function} setTimeoutFunc - an implementation of setTimeout
-	 *  if nothing is passed in the default setTimeout function is used
-	  * @param {?function} clearTimeoutFunc - an implementation of clearTimeout
-	 *  if nothing is passed in the default clearTimeout function is used
+	 * @param {boolean} shouldDebounce - if false, no debounce and func is executed.
 	 */
-	function debounce(func, context) {
+	function debounce(func, context, shouldDebounce) {
 	  var pendingCallback;
 
 	  function debouncer() {
@@ -6856,6 +6873,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    debouncer.reset();
+
+	    if (!shouldDebounce) {
+	      return func.apply(context, args);
+	    }
 
 	    var callback = function callback() {
 	      func.apply(context, args);

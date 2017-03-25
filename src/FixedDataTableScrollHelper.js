@@ -15,7 +15,7 @@
 var PrefixIntervalTree = require('PrefixIntervalTree');
 var clamp = require('clamp');
 
-var BUFFER_ROWS = 16;
+var BUFFER_ROWS = 10;
 var NO_ROWS_SCROLL_RESULT = {
   index: 0,
   offset: 0,
@@ -114,7 +114,9 @@ class FixedDataTableScrollHelper {
       return NO_ROWS_SCROLL_RESULT;
     }
     var firstRow = this._rowOffsets.greatestLowerBound(this._position);
-    firstRow = clamp(firstRow, 0, Math.max(this._rowCount - 1, 0));
+    var _count = this._rowCount - 1;
+    var count = _count > 0 ? _count : 0;
+    firstRow = clamp(firstRow, 0, count);
     var firstRowPosition = this._rowOffsets.sumUntil(firstRow);
     var rowIndex = firstRow;
     var position = this._position;
@@ -167,7 +169,7 @@ class FixedDataTableScrollHelper {
     position = clamp(position, 0, maxPosition);
     this._position = position;
     var firstRowIndex = this._rowOffsets.greatestLowerBound(position);
-    firstRowIndex = clamp(firstRowIndex, 0, Math.max(this._rowCount - 1, 0));
+    firstRowIndex = clamp(firstRowIndex, 0, count);
     firstRowPosition = this._rowOffsets.sumUntil(firstRowIndex);
     var firstRowOffset = firstRowPosition - position;
 
@@ -197,16 +199,16 @@ class FixedDataTableScrollHelper {
       }
     }
     var position = this._rowOffsets.sumTo(rowIndex) - this._viewportHeight;
-    if (position < 0) {
-      position = 0;
-    }
-    return position;
+    return position < 0
+      ? 0
+      : position;
   }
 
   scrollTo(/*number*/ position) /*object*/ {
     if (this._rowCount === 0) {
       return NO_ROWS_SCROLL_RESULT;
     }
+    var rowIndex = this._rowCount - 1;
     if (position <= 0) {
       // If position less than or equal to 0 first row should be fully visible
       // on top
@@ -222,13 +224,12 @@ class FixedDataTableScrollHelper {
     } else if (position >= this._contentHeight - this._viewportHeight) {
       // If position is equal to or greater than max scroll value, we need
       // to make sure to have bottom border of last row visible.
-      var rowIndex = this._rowCount - 1;
       position = this._getRowAtEndPosition(rowIndex);
     }
     this._position = position;
 
     var firstRowIndex = this._rowOffsets.greatestLowerBound(position);
-    firstRowIndex = clamp(firstRowIndex, 0, Math.max(this._rowCount - 1, 0));
+    firstRowIndex = clamp(firstRowIndex, 0, rowIndex > 0 ? rowIndex : 0);
     var firstRowPosition = this._rowOffsets.sumUntil(firstRowIndex);
     var firstRowOffset = firstRowPosition - position;
 
@@ -248,10 +249,11 @@ class FixedDataTableScrollHelper {
    * brings that row to top of viewport with that offset
    */
   scrollToRow(/*number*/ rowIndex, /*number*/ offset) /*object*/ {
-    rowIndex = clamp(rowIndex, 0, Math.max(this._rowCount - 1, 0));
-    offset = clamp(offset, -this._storedHeights[rowIndex], 0);
-    var firstRow = this._rowOffsets.sumUntil(rowIndex);
-    return this.scrollTo(firstRow - offset);
+    var count = this._rowCount - 1;
+    var newIndex = clamp(rowIndex, 0, count > 0 ? count : 0);
+    var newOffset = clamp(offset, -this._storedHeights[newIndex], 0);
+    var firstRow = this._rowOffsets.sumUntil(newIndex);
+    return this.scrollTo(firstRow - newOffset);
   }
 
   /**
@@ -263,13 +265,14 @@ class FixedDataTableScrollHelper {
    * bottom of viewport.
    */
   scrollRowIntoView(/*number*/ rowIndex) /*object*/ {
-    rowIndex = clamp(rowIndex, 0, Math.max(this._rowCount - 1, 0));
-    var rowBegin = this._rowOffsets.sumUntil(rowIndex);
-    var rowEnd = rowBegin + this._storedHeights[rowIndex];
+    var count = this._rowCount - 1;
+    var newIndex = clamp(rowIndex, 0, count > 0 ? count : 0);
+    var rowBegin = this._rowOffsets.sumUntil(newIndex);
+    var rowEnd = rowBegin + this._storedHeights[newIndex];
     if (rowBegin < this._position) {
       return this.scrollTo(rowBegin);
     } else if (this._position + this._viewportHeight < rowEnd) {
-      var position = this._getRowAtEndPosition(rowIndex);
+      var position = this._getRowAtEndPosition(newIndex);
       return this.scrollTo(position);
     }
     return this.scrollTo(this._position);

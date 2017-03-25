@@ -60,18 +60,18 @@ var cancelIdleCallback =
  *   debouncedUpdatePreview.reset();
  *
  * @param {function} func - the function to debounce
- * @param {number} wait - how long to wait in milliseconds
  * @param {*} context - optional context to invoke the function in
- * @param {?function} setTimeoutFunc - an implementation of setTimeout
- *  if nothing is passed in the default setTimeout function is used
-  * @param {?function} clearTimeoutFunc - an implementation of clearTimeout
- *  if nothing is passed in the default clearTimeout function is used
+ * @param {boolean} shouldDebounce - if false, no debounce and func is executed.
  */
-function debounce(func, context) {
+function debounce(func, context, shouldDebounce) {
   var pendingCallback;
 
   function debouncer(...args) {
     debouncer.reset();
+
+    if ( !shouldDebounce ) {
+      return func.apply(context, args);
+    }
 
     var callback = function() {
       func.apply(context, args);
