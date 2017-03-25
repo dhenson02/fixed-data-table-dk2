@@ -13,7 +13,7 @@
 'use strict';
 
 var React = require('React');
-var shallowEqual = require('shallowEqual');
+var shallowCompare = require('react-addons-shallow-compare');
 var FixedDataTableCellGroup = require('FixedDataTableCellGroup.react');
 
 var cx = require('cx');
@@ -128,13 +128,7 @@ var FixedDataTableRowImpl = React.createClass({
   },
 
   shouldComponentUpdate( nextProps, nextState ) {
-    return nextProps.isScrolling !== this.props.isScrolling ||
-           nextProps.height !== this.props.height ||
-           nextProps.index !== this.props.index ||
-           // nextProps.scrollLeft !== this.props.scrollLeft ||
-           nextProps.width !== this.props.width ||
-           !shallowEqual(nextProps.fixedColumns, this.props.fixedColumns) ||
-           !shallowEqual(nextProps.scrollableColumns, this.props.scrollableColumns);
+    return shallowCompare(this, nextProps, nextState);
   },
 
   render() /*object*/ {
@@ -204,8 +198,9 @@ var FixedDataTableRowImpl = React.createClass({
   },
 
   _getColumnsWidth(/*array*/ columns) /*number*/ {
+    var total = columns.length;
     var width = 0;
-    for (var i = 0; i < columns.length; ++i) {
+    for (var i = 0; i < total; ++i) {
       width += columns[i].props.width;
     }
     return width;
@@ -281,12 +276,8 @@ var FixedDataTableRow = React.createClass({
     getRowWrapper: PropTypes.func
   },
 
-  shouldComponentUpdate( nextProps ) {
-    return nextProps.isScrolling !== this.props.isScrolling ||
-           nextProps.height !== this.props.height ||
-           nextProps.zIndex !== this.props.zIndex ||
-           nextProps.offsetTop !== this.props.offsetTop ||
-           nextProps.width !== this.props.width;
+  shouldComponentUpdate( nextProps, nextState ) {
+    return shallowCompare(this, nextProps, nextState);
   },
 
   render() /*object*/ {

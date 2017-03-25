@@ -14,8 +14,7 @@
 
 var FixedDataTableHelper = require('FixedDataTableHelper');
 var React = require('React');
-var raf = require('nativeRequestAnimationFrame');
-var shallowEqual = require('shallowEqual');
+var shallowCompare = require('react-addons-shallow-compare');
 var FixedDataTableCell = require('FixedDataTableCell.react');
 
 var cx = require('cx');
@@ -62,50 +61,23 @@ var FixedDataTableCellGroupImpl = React.createClass({
     getRowWrapper: PropTypes.func
   },
 
-  shouldComponentUpdate( nextProps ) {
-    return nextProps.isScrolling !== this.props.isScrolling ||
-           nextProps.left !== this.props.left ||
-           nextProps.rowHeight !== this.props.rowHeight ||
-           nextProps.rowIndex !== this.props.rowIndex ||
-           nextProps.width !== this.props.width ||
-           !shallowEqual(nextProps.columns, this.props.columns) ||
-           nextProps.zIndex !== this.props.zIndex;
+  shouldComponentUpdate( nextProps, nextState ) {
+    return shallowCompare(this, nextProps, nextState);
   },
 
-  shouldReRender( props, nextProps ) {
-    var leftDiff = props.left - nextProps.left;
-    return !props.allowCellsRecycling || (
-      leftDiff <= nextProps.width &&
-      leftDiff + props.width >= 0
-    );
-  },
-
-  checkCellPosition( props ) {
-    return function ( cellGroupEl, nextProps ) {
-      if ( !this.shouldReRender(props, nextProps) ) {
-        var style = translateDOMPositionXY({}, -1 * DIR_SIGN * nextProps.left, 0);
-        raf(function ( style ) {
-          this.style = style;
-        }.bind(cellGroupEl, style));
-        return false;
-      }
-      return true;
-    };
-  },
-
-  _renderCells( columns ) {
+  render() /*object*/ {
     var props = this.props;
+    var columns = props.columns;
     var cells = new Array(columns.length);
+
     var currentPosition = 0;
-    var columnProps;
-    for ( var i = 0, j = columns.length; i < j; ++i ) {
-      columnProps = columns[ i ].props;
-      if ( this.shouldReRender(columnProps, {
-          left: currentPosition,
-          width: props.width
-        }) ) {
+    for (var i = 0, j = columns.length; i < j; i++) {
+      var columnProps = columns[i].props;
+      if (!columnProps.allowCellsRecycling || (
+            currentPosition - props.left <= props.width &&
+            currentPosition - props.left + columnProps.width >= 0)) {
         var key = 'cell_' + i;
-        cells[ i ] = this._renderCell(
+        cells[i] = this._renderCell(
           props.rowIndex,
           props.rowHeight,
           columnProps,
@@ -115,13 +87,7 @@ var FixedDataTableCellGroupImpl = React.createClass({
       }
       currentPosition += columnProps.width;
     }
-    return cells;
-  },
 
-  render() /*object*/ {
-    var props = this.props;
-    var columns = props.columns;
-    var cells = this._renderCells(columns);
     var contentWidth = this._getColumnsWidth(columns);
 
     var style = {
@@ -175,9 +141,6 @@ var FixedDataTableCellGroupImpl = React.createClass({
         width={columnProps.width}
         left={left}
         cell={columnProps.cell}
-        setRef={!columnProps.fixed ?
-                columnProps.setRef(this.checkCellPosition({ left: left, width: columnProps.width })) :
-                () => {}}
       />
     );
   },
@@ -199,8 +162,6 @@ var FixedDataTableCellGroup = React.createClass({
    * development, but please don't commit this component with enabled propTypes.
    */
   propTypes_DISABLED_FOR_PERFORMANCE: {
-    setRef: PropTypes.func,
-
     isScrolling: PropTypes.bool,
     /**
      * Height of the row.

@@ -77,19 +77,15 @@ var FixedDataTableCell = React.createClass({
      */
     left: PropTypes.number,
 
+    /**
+     * Use the ref/DOM element to manipulate directly for intense ops
+     */
     setRef: PropTypes.func
   },
 
   shouldComponentUpdate(nextProps) {
     return !nextProps.isScrolling ||
-           nextProps.rowIndex !== this.props.rowIndex ||
-           nextProps.columnKey !== this.props.columnKey ||
-           nextProps.className !== this.props.className ||
-           nextProps.highlighted !== this.props.highlighted ||
-           nextProps.width !== this.props.width ||
-           nextProps.minWidth !== this.props.minWidth ||
-           nextProps.maxWidth !== this.props.maxWidth ||
-           nextProps.height !== this.props.height;
+           nextProps.rowIndex !== this.props.rowIndex;
   },
 
   getDefaultProps() /*object*/ {
