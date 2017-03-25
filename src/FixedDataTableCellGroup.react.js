@@ -14,7 +14,7 @@
 
 var FixedDataTableHelper = require('FixedDataTableHelper');
 var React = require('React');
-var fastdom = require('fastdom');
+var raf = require('nativeRequestAnimationFrame');
 var shallowEqual = require('shallowEqual');
 var FixedDataTableCell = require('FixedDataTableCell.react');
 
@@ -84,7 +84,7 @@ var FixedDataTableCellGroupImpl = React.createClass({
     return function ( cellGroupEl, nextProps ) {
       if ( !this.shouldReRender(props, nextProps) ) {
         var style = translateDOMPositionXY({}, -1 * DIR_SIGN * nextProps.left, 0);
-        fastdom.mutate(function ( style ) {
+        raf(function ( style ) {
           this.style = style;
         }.bind(cellGroupEl, style));
         return false;

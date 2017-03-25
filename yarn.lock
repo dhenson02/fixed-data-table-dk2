@@ -824,12 +824,6 @@ faker@^2.1.2:
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/faker/-/faker-2.1.5.tgz#e07f8bff5e1262e67fd5193fca0785f4ca681150"
 
-fastdom@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/fastdom/-/fastdom-1.0.5.tgz#1a08026b493b2bb31ee134585e740da2ad0e05e0"
-  dependencies:
-    strictdom "^1.0.1"
-
 fastparse@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"
@@ -2277,10 +2271,6 @@ stream-browserify@^1.0.0:
 stream-cache@~0.0.1:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/stream-cache/-/stream-cache-0.0.2.tgz#1ac5ad6832428ca55667dbdee395dad4e6db118f"
-
-strictdom@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/strictdom/-/strictdom-1.0.1.tgz#189de91649f73d44d59b8432efa68ef9d2659460"
 
 string-width@^1.0.1:
   version "1.0.2"
