@@ -1,5 +1,5 @@
 {
-  "name": "fixed-data-table-dk2",
+  "name": "fixed-data-table-dk",
   "version": "0.7.0",
   "description": "A React table component designed to allow presenting thousands of rows of data.  With one extra change.",
   "main": "main.js",
@@ -47,11 +47,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dhenson02/fixed-data-table-dk2.git"
+    "url": "https://github.com/dhenson02/fixed-data-table-dk.git"
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/dhenson02/fixed-data-table-dk2/issues"
+    "url": "https://github.com/dhenson02/fixed-data-table-dk/issues"
   },
   "homepage": "http://facebook.github.io/fixed-data-table",
   "tags": [
