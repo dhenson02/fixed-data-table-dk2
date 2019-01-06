@@ -20,7 +20,7 @@ var cx = require('cx');
 var joinClasses = require('joinClasses');
 var translateDOMPositionXY = require('translateDOMPositionXY');
 
-var {PropTypes} = React;
+var PropTypes = require('prop-types');
 
 /**
  * Component that renders the row for <FixedDataTable />.

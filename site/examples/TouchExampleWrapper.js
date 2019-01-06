@@ -16,7 +16,7 @@ var React = require('react');
 var ZyngaScroller = require('../ZyngaScroller');
 var TouchableArea = require('./TouchableArea');
 
-var PropTypes = React.PropTypes;
+var PropTypes = require('prop-types');
 
 function isTouchDevice() {
   return 'ontouchstart' in document.documentElement // works on most browsers

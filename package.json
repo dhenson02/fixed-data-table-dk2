@@ -1,11 +1,11 @@
 {
-  "name": "fixed-data-table-dk",
+  "name": "fixed-data-table-dk2",
   "version": "0.6.6",
   "description": "A React table component designed to allow presenting thousands of rows of data.  With one extra change.",
   "main": "main.js",
   "peerDependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
   },
   "devDependencies": {
     "autoprefixer": "^5.0.0",
@@ -24,10 +24,11 @@
     "null-loader": "^0.1.0",
     "postcss": "^4.0.2",
     "postcss-custom-properties": "3.0.1",
-    "react": "^15.3.2",
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
     "react-addons-shallow-compare": "^15.3.2",
-    "react-dom": "^15.3.2",
     "react-docgen": "^1.2.0",
+    "react-dom": "^16.7.0",
     "react-tools": "^0.12.2",
     "style-loader": "^0.8.3",
     "url-loader": "^0.5.5",
@@ -46,11 +47,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dhenson02/fixed-data-table-dk.git"
+    "url": "https://github.com/dhenson02/fixed-data-table-dk2.git"
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/dhenson02/fixed-data-table-dk/issues"
+    "url": "https://github.com/dhenson02/fixed-data-table-dk2/issues"
   },
   "homepage": "http://facebook.github.io/fixed-data-table",
   "tags": [

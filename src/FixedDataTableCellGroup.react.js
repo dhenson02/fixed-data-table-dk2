@@ -20,7 +20,7 @@ var FixedDataTableCell = require('FixedDataTableCell.react');
 var cx = require('cx');
 var translateDOMPositionXY = require('translateDOMPositionXY');
 
-var {PropTypes} = React;
+var PropTypes = require('prop-types');
 
 var DIR_SIGN = FixedDataTableHelper.DIR_SIGN;
 
